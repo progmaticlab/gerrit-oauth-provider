@@ -44,6 +44,7 @@ class InitOAuth implements InitStep {
   private final Section googleOAuthProviderSection;
   private final Section githubOAuthProviderSection;
   private final Section bitbucketOAuthProviderSection;
+  private final Section yandexOAuthProviderSection;
   private final Section casOAuthProviderSection;
   private final Section facebookOAuthProviderSection;
   private final Section gitlabOAuthProviderSection;
@@ -64,6 +65,8 @@ class InitOAuth implements InitStep {
         sections.get(PLUGIN_SECTION, pluginName + GitHubOAuthService.CONFIG_SUFFIX);
     this.bitbucketOAuthProviderSection =
         sections.get(PLUGIN_SECTION, pluginName + BitbucketOAuthService.CONFIG_SUFFIX);
+    this.yandexOAuthProviderSection =
+        sections.get(PLUGIN_SECTION, pluginName + YandexOAuthService.CONFIG_SUFFIX);
     this.casOAuthProviderSection =
         sections.get(PLUGIN_SECTION, pluginName + CasOAuthService.CONFIG_SUFFIX);
     this.facebookOAuthProviderSection =
@@ -112,6 +115,15 @@ class InitOAuth implements InitStep {
             "Use Bitbucket OAuth provider for Gerrit login ?");
     if (configureBitbucketOAuthProvider && configureOAuth(bitbucketOAuthProviderSection)) {
       bitbucketOAuthProviderSection.string(
+          FIX_LEGACY_USER_ID_QUESTION, FIX_LEGACY_USER_ID, "false");
+    }
+
+    boolean configureYandexOAuthProvider =
+        ui.yesno(
+            isConfigured(yandexOAuthProviderSection),
+            "Use Yandex OAuth provider for Gerrit login ?");
+    if (configureYandexOAuthProvider && configureOAuth(yandexOAuthProviderSection)) {
+      yandexOAuthProviderSection.string(
           FIX_LEGACY_USER_ID_QUESTION, FIX_LEGACY_USER_ID, "false");
     }
 

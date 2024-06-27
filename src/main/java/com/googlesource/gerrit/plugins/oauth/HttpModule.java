@@ -100,6 +100,13 @@ class HttpModule extends ServletModule {
           .to(KeycloakOAuthService.class);
     }
 
+    cfg = cfgFactory.getFromGerritConfig(pluginName + YandexOAuthService.CONFIG_SUFFIX);
+    if (cfg.getString(InitOAuth.CLIENT_ID) != null) {
+      bind(OAuthServiceProvider.class)
+          .annotatedWith(Exports.named(YandexOAuthService.CONFIG_SUFFIX))
+          .to(YandexOAuthService.class);
+    }
+
     boolean office365LegacyProviderBound = false;
     cfg =
         cfgFactory.getFromGerritConfig(
