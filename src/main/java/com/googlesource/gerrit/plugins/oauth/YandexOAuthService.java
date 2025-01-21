@@ -47,7 +47,7 @@ public class YandexOAuthService implements OAuthServiceProvider {
   private static final Logger log = getLogger(YandexOAuthService.class);
   static final String CONFIG_SUFFIX = "-yandex-oauth";
   private static final String YANDEX_PROVIDER_PREFIX = "yandex-oauth:";
-  private static final String PROTECTED_RESOURCE_URL = "https://login.yandex.ru/info";
+  private static final String PROTECTED_RESOURCE_URL = "https://id.yandex.ru/personal";
   private final boolean fixLegacyUserId;
   private final OAuth20Service service;
 
@@ -88,22 +88,20 @@ public class YandexOAuthService implements OAuthServiceProvider {
       }
       if (userJson.isJsonObject()) {
         JsonObject jsonObject = userJson.getAsJsonObject();
-        JsonElement id = jsonObject.get("id");
-        if (id == null || id.isJsonNull()) {
-          throw new IOException("Response doesn't contain id field");
+        JsonObject userObject = jsonObject.getAsJsonObject("user");
+        if (userObject == null || userObject.isJsonNull()) {
+          throw new IOException("Response doesn't contain 'user' field");
         }
-        JsonElement email = jsonObject.get("default_email");
-        if (!email.getAsString().endsWith("@progmaticlab.com")) {
-          throw new IllegalArgumentException("Hosted domain does not match. Only progmaticlab.com domain is supported.");
-        }
-        JsonElement name = jsonObject.get("real_name");
-        JsonElement login = jsonObject.get("login");
+        JsonElement usernameElement = userObject.get("username");
+        String username = usernameElement.getAsString();
+
+        JsonElement displayName = jsonObject.get("display_name");
         return new OAuthUserInfo(
-            GITHUB_PROVIDER_PREFIX + id.getAsString(),
-            login == null || login.isJsonNull() ? null : login.getAsString(),
-            email == null || email.isJsonNull() ? null : email.getAsString(),
-            name == null || name.isJsonNull() ? null : name.getAsString(),
-            fixLegacyUserId ? id.getAsString() : null);
+            YANDEX_PROVIDER_PREFIX + username,
+            username,
+            null,
+            displayName == null || displayName.isJsonNull() ? null : displayName.getAsString(),
+            fixLegacyUserId ? username : null);
       }
     } catch (ExecutionException | InterruptedException e) {
       throw new RuntimeException("Cannot retrieve user info resource", e);
